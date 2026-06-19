@@ -1783,7 +1783,7 @@ namespace BizHawk.Client.EmuHawk
 				}
 
 				sb.Append(string.IsNullOrEmpty(VersionInfo.CustomBuildString)
-					? "BizHawk"
+					? "SoulSync"
 					: VersionInfo.CustomBuildString);
 				if (VersionInfo.DeveloperBuild) sb.Append(" (interim)");
 
@@ -1797,7 +1797,7 @@ namespace BizHawk.Client.EmuHawk
 			{
 				var sb = new StringBuilder();
 				sb.Append(string.IsNullOrEmpty(VersionInfo.CustomBuildString)
-					? "BizHawk"
+					? "SoulSync"
 					: VersionInfo.CustomBuildString);
 				if (VersionInfo.DeveloperBuild) sb.Append(" (interim)");
 				return sb.ToString();
