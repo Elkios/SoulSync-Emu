@@ -81,6 +81,13 @@ namespace BizHawk.Client.EmuHawk
 		{
 			UpdateWindowTitle();
 
+			// SoulSync : menu d'ouverture du dashboard WebView2
+			var soulSyncMenu = new ToolStripMenuItem("SoulSync");
+			var openDashItem = new ToolStripMenuItem("Dashboard");
+			openDashItem.Click += (_, _) => new SoulSyncDashboard().Show(this);
+			soulSyncMenu.DropDownItems.Add(openDashItem);
+			MainformMenu.Items.Add(soulSyncMenu);
+
 			Slot1StatusButton.Tag = SelectSlot1MenuItem.Tag = 1;
 			Slot2StatusButton.Tag = SelectSlot2MenuItem.Tag = 2;
 			Slot3StatusButton.Tag = SelectSlot3MenuItem.Tag = 3;

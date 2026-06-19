@@ -508,4 +508,7 @@
 		<Compile Update="tools/Watch/WatchValueBox.cs" SubType="Component" />
 		<Compile Update="UpdateChecker.cs" SubType="Code" />
 	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Web.WebView2" />
+	</ItemGroup>
 </Project>
