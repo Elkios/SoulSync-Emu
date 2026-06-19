@@ -81,11 +81,19 @@ namespace BizHawk.Client.EmuHawk
 		{
 			UpdateWindowTitle();
 
-			// SoulSync : menu d'ouverture du dashboard WebView2
+			// SoulSync : panneau dashboard docké à droite, toggle via le menu
+			_soulSyncPanel = new SoulSyncPanel { Dock = DockStyle.Right, Visible = false };
+			Controls.InsertBefore(MainformMenu, insert: _soulSyncPanel);
 			var soulSyncMenu = new ToolStripMenuItem("SoulSync");
-			var openDashItem = new ToolStripMenuItem("Dashboard");
-			openDashItem.Click += (_, _) => new SoulSyncDashboard().Show(this);
-			soulSyncMenu.DropDownItems.Add(openDashItem);
+			var toggleDashItem = new ToolStripMenuItem("Dashboard") { CheckOnClick = true };
+			toggleDashItem.Click += (_, _) =>
+			{
+				var show = toggleDashItem.Checked;
+				_soulSyncPanel.Visible = show;
+				if (show) _soulSyncPanel.EnsureStarted();
+				Width += show ? _soulSyncPanel.Width : -_soulSyncPanel.Width;
+			};
+			soulSyncMenu.DropDownItems.Add(toggleDashItem);
 			MainformMenu.Items.Add(soulSyncMenu);
 
 			Slot1StatusButton.Tag = SelectSlot1MenuItem.Tag = 1;
@@ -1745,6 +1753,8 @@ namespace BizHawk.Client.EmuHawk
 		private Bitmap _linkCableOff;
 
 		private readonly PresentationPanel _presentationPanel;
+
+		private SoulSyncPanel _soulSyncPanel;
 
 		// countdown for saveram autoflushing
 		public int AutoFlushSaveRamIn { get; set; }

@@ -11,25 +11,30 @@ using Microsoft.Web.WebView2.WinForms;
 namespace BizHawk.Client.EmuHawk
 {
 	/// <summary>
-	/// Panneau SoulSync : héberge une WebView2 qui affiche le dashboard HTML/CSS.
-	/// Étape 1 du fork : prouver l'intégration WebView2 dans EmuHawk. Le contenu
-	/// est pour l'instant inline (NavigateToString) ; il sera alimenté par le C#
-	/// (lecture mémoire → PostWebMessage) une fois le tracker porté.
+	/// Panneau latéral SoulSync : héberge une WebView2 qui affiche le dashboard
+	/// HTML/CSS. Conçu pour être docké (DockStyle.Right) dans la fenêtre EmuHawk
+	/// = une seule fenêtre. La WebView2 s'initialise paresseusement au 1er affichage.
+	/// Plus tard : alimenté en direct par le C# (lecture mémoire → PostWebMessage).
 	/// </summary>
-	public sealed class SoulSyncDashboard : Form
+	public sealed class SoulSyncPanel : UserControl
 	{
 		private readonly WebView2 _web;
+		private bool _initStarted;
 
-		public SoulSyncDashboard()
+		public SoulSyncPanel()
 		{
-			Text = "SoulSync — Dashboard";
-			Width = 460;
-			Height = 720;
-			MinimumSize = new System.Drawing.Size(320, 400);
-			ShowInTaskbar = false;
+			Width = 380;
+			BackColor = System.Drawing.Color.FromArgb(10, 19, 34);
 			_web = new WebView2 { Dock = DockStyle.Fill };
 			Controls.Add(_web);
-			Load += async (_, _) => await InitAsync();
+		}
+
+		/// <summary>Initialise la WebView2 au premier affichage (évite de la créer si jamais ouverte).</summary>
+		public void EnsureStarted()
+		{
+			if (_initStarted) return;
+			_initStarted = true;
+			_ = InitAsync();
 		}
 
 		private async Task InitAsync()
@@ -43,13 +48,16 @@ namespace BizHawk.Client.EmuHawk
 			}
 			catch (Exception ex)
 			{
-				var lbl = new Label
+				_initStarted = false; // autorise un nouvel essai
+				Controls.Add(new Label
 				{
-					Dock = DockStyle.Fill,
+					Dock = DockStyle.Top,
+					AutoSize = false,
+					Height = 90,
+					ForeColor = System.Drawing.Color.White,
 					Text = "WebView2 indisponible : " + ex.Message
-						+ "\n\nInstalle le runtime Microsoft Edge WebView2.",
-				};
-				Controls.Add(lbl);
+						+ "\nInstalle le runtime Microsoft Edge WebView2.",
+				});
 			}
 		}
 
@@ -59,7 +67,7 @@ namespace BizHawk.Client.EmuHawk
   :root { --soul:#ff5470; --sync:#36d1dc; --or:#f5c451; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'Segoe UI',sans-serif; color:#eef0f6;
-         background:linear-gradient(160deg,#0a1322,#16294a); height:100vh; }
+         background:linear-gradient(160deg,#0a1322,#16294a); min-height:100vh; }
   header { padding:18px 16px; text-align:center;
            background:linear-gradient(90deg,var(--soul),var(--sync)); }
   header h1 { margin:0; font-size:22px; letter-spacing:1px; }
@@ -77,7 +85,7 @@ namespace BizHawk.Client.EmuHawk
   footer { text-align:center; font-size:11px; opacity:.6; padding:10px; }
 </style></head>
 <body>
-  <header><h1>SoulSync</h1><p>WebView2 intégré dans l'émulateur ✔</p></header>
+  <header><h1>SoulSync</h1><p>Panneau docké dans l'émulateur ✔</p></header>
   <div class='cards'>
     <div class='card'><div class='pic'></div>
       <div style='flex:1'><b>Salamèche</b> <span class='link'>🔗 lien #1</span>
