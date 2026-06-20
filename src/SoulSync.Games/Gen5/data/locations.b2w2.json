@@ -1,0 +1,36 @@
+{
+  "_meta": {
+    "game": "b2w2",
+    "idSpace": "Gen V met-location index (block D 0x80) — also the current-location id",
+    "source": "Bulbapedia: List of locations by index number (Generation V), verified live (117=Aspertia, 124=Route 19)",
+    "note": "Names per UI language. Routes are identical EN/FR; town/city names differ. This is a STARTER set (early game) — extend with the full Gen V index table, or extract from the ROM text for exact in-game names."
+  },
+  "en": {
+    "117": "Aspertia City",
+    "118": "Virbank City",
+    "119": "Humilau City",
+    "120": "Pokéstar Studios",
+    "121": "Join Avenue",
+    "122": "Floccesy Town",
+    "123": "Lentimas Town",
+    "124": "Route 19",
+    "125": "Route 20",
+    "126": "Route 21",
+    "127": "Route 22",
+    "128": "Route 23",
+    "129": "Castelia Sewers",
+    "130": "Floccesy Ranch",
+    "131": "Virbank Complex",
+    "132": "Reversal Mountain",
+    "133": "Strange House"
+  },
+  "fr": {
+    "117": "Pavonnay",
+    "118": "Méanville",
+    "124": "Route 19",
+    "125": "Route 20",
+    "126": "Route 21",
+    "127": "Route 22",
+    "128": "Route 23"
+  }
+}
