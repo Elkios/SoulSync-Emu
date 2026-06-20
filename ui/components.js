@@ -49,13 +49,18 @@ const SS = {
   },
 };
 
-// --- form components ---
+// --- form components (each control bound to a state key via data-bind / data-seg) ---
 SS.optRow = (label, control, sub) =>
   `<div class="opt"><span class="l">${label}${sub ? `<small>${sub}</small>` : ''}</span>${control}</div>`;
-SS.toggle = (on = false) =>
-  `<label class="ss-toggle"><input type="checkbox"${on ? ' checked' : ''}><span class="tr"></span></label>`;
-SS.select = (opts) => `<select class="ss-select">${opts.map(o => `<option>${o}</option>`).join('')}</select>`;
-SS.range = (min, max, val) => `<input class="ss-range" type="range" min="${min}" max="${max}" value="${val}">`;
+SS.toggle = (bind, on = false) =>
+  `<label class="ss-toggle"><input type="checkbox" data-bind="${bind}"${on ? ' checked' : ''}><span class="tr"></span></label>`;
+SS.select = (bind, opts, val) =>
+  `<select class="ss-select" data-bind="${bind}">${opts.map(o => `<option${o === val ? ' selected' : ''}>${o}</option>`).join('')}</select>`;
+SS.range = (bind, min, max, val) =>
+  `<input class="ss-range" type="range" data-bind="${bind}" min="${min}" max="${max}" value="${val}">`;
+// opts = [[value,label],...]
+SS.seg = (bind, opts, val) =>
+  `<div class="seg" data-seg="${bind}">${opts.map(o => `<button class="${o[0] === val ? 'on' : ''}" data-val="${o[0]}">${o[1]}</button>`).join('')}</div>`;
 SS.progress = (pct = 0) => `<div class="ss-progress"><i style="width:${pct}%"></i></div>`;
 
 // tiny i18n (falls back to the key). Loaded locale set via SS.setLocale.
