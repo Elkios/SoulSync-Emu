@@ -21,7 +21,7 @@ const SS = {
 
   panel: (inner, cls = '') => `<div class="panel ${cls}"><div class="in">${inner}</div></div>`,
 
-  iconBtn: (icon, action = '') => `<a class="iconbtn"${action ? ` data-action="${action}"` : ''}>${icon}</a>`,
+  iconBtn: (icon, nav = '') => `<a class="iconbtn"${nav ? ` data-nav="${nav}"` : ''}>${icon}</a>`,
 
   badge: (text, kind = '') => `<span class="ss-badge ${kind}">${text}</span>`,
 
@@ -48,6 +48,15 @@ const SS = {
       `</div></div></div>`;
   },
 };
+
+// --- form components ---
+SS.optRow = (label, control, sub) =>
+  `<div class="opt"><span class="l">${label}${sub ? `<small>${sub}</small>` : ''}</span>${control}</div>`;
+SS.toggle = (on = false) =>
+  `<label class="ss-toggle"><input type="checkbox"${on ? ' checked' : ''}><span class="tr"></span></label>`;
+SS.select = (opts) => `<select class="ss-select">${opts.map(o => `<option>${o}</option>`).join('')}</select>`;
+SS.range = (min, max, val) => `<input class="ss-range" type="range" min="${min}" max="${max}" value="${val}">`;
+SS.progress = (pct = 0) => `<div class="ss-progress"><i style="width:${pct}%"></i></div>`;
 
 // tiny i18n (falls back to the key). Loaded locale set via SS.setLocale.
 SS.t = (k, vars) => {

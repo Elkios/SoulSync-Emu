@@ -104,3 +104,21 @@ h1,h2,h3{ font-weight:400; text-shadow:1px 1px 0 #000a; margin:0; }
 .st.psn,.st.tox{ background:#a040a0; } .st.brn{ background:#f08030; } .st.par{ background:#b8a000; } .st.slp{ background:#7a8696; } .st.frz{ background:#48b0c8; }
 .ss-badge{ font-family:var(--ui); font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:#0e1f40; color:var(--mut); }
 .ss-badge.ok{ background:#1c4a23; color:var(--green); } .ss-badge.wait{ background:#3a3412; color:var(--yellow); } .ss-badge.host{ background:#3a1c1a; color:#ff8a7a; }
+
+/* ---- form components ---- */
+.opt{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid #25406f; }
+.opt:last-child{ border-bottom:none; }
+.opt .l{ font-family:var(--ui); font-size:13px; } .opt .l small{ display:block; color:#7e93b8; font-size:11px; }
+.ss-toggle{ position:relative; width:44px; height:24px; flex:none; cursor:pointer; }
+.ss-toggle input{ display:none; }
+.ss-toggle .tr{ position:absolute; inset:0; background:#0e1f40; border:1px solid #34507f; border-radius:999px; transition:.2s; }
+.ss-toggle .tr::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; background:#9fb6dd; border-radius:50%; transition:.2s; }
+.ss-toggle input:checked + .tr{ background:var(--green); border-color:var(--green); }
+.ss-toggle input:checked + .tr::after{ transform:translateX(20px); background:#fff; }
+.ss-select{ background:#0e1f40; color:#fff; border:2px solid #34507f; border-radius:6px; padding:5px 8px; font-family:var(--ui); font-size:12px; }
+.ss-range{ width:120px; accent-color:var(--or); }
+.ss-progress{ height:14px; background:#0a1730; border:2px solid #000; border-radius:8px; overflow:hidden; }
+.ss-progress > i{ display:block; height:100%; background:linear-gradient(180deg,#ffe08a,var(--or)); }
+.seg{ display:inline-flex; border:2px solid #34507f; border-radius:8px; overflow:hidden; }
+.seg button{ background:#0e1f40; color:#9fb6dd; border:none; padding:5px 14px; font-family:var(--ds); font-size:15px; cursor:pointer; }
+.seg button.on{ background:var(--braise); color:#fff; }
