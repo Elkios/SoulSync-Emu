@@ -1,0 +1,104 @@
+/* =============================================================================
+   SoulSync — Design Tokens (single source of truth)
+   Layer 0 of the design system. Primitives -> semantic, named by intent.
+   Two themes: [data-theme="dark"] (in-game overlay) · [data-theme="light"] (menus).
+   ============================================================================= */
+
+:root {
+  /* ---- PRIMITIVES (raw values, never used directly in components) ---- */
+  --braise:      #e6392c;
+  --braise-600:  #c22e23;
+  --or:          #f5c451;
+  --or-600:      #d9a73a;
+  --ink:         #0e0f14;
+  --white:       #ffffff;
+
+  /* functional / game states */
+  --green:       #5ad94e;
+  --yellow:      #ffd23f;
+  --red:         #ff4d57;
+
+  /* player accents */
+  --player-1:    #e6392c;
+  --player-2:    #36d1dc;
+  --player-3:    #a78bfa;
+  --player-4:    #ff9f45;
+
+  /* neutral ramp */
+  --n-0:  #ffffff;
+  --n-50: #f3f4f8;
+  --n-100:#e8ebf2;
+  --n-200:#cdd2df;
+  --n-300:#9aa0b2;
+  --n-500:#5b6275;
+  --n-700:#262c3a;
+  --n-800:#181c26;
+  --n-900:#0f1118;
+  --n-950:#0a0c12;
+
+  /* ---- TYPOGRAPHY ---- */
+  --font-display: 'Jersey 10', system-ui, sans-serif;
+  --font-body:    'Nunito', system-ui, -apple-system, sans-serif;
+
+  --fs-0: 11px;  --fs-1: 13px;  --fs-2: 15px;  --fs-3: 18px;
+  --fs-4: 22px;  --fs-5: 28px;  --fs-6: 36px;  --fs-7: 48px;  --fs-8: 64px;
+  --fw-regular: 400; --fw-semibold: 600; --fw-bold: 700; --fw-black: 800;
+  --lh-tight: 1.1; --lh-normal: 1.5;
+
+  /* ---- SPACING (4px base) ---- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+
+  /* ---- RADII ---- */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-full: 999px;
+
+  /* ---- SHADOWS ---- */
+  --sh-1: 0 2px 6px rgba(0,0,0,.25);
+  --sh-2: 0 6px 18px rgba(0,0,0,.35);
+  --sh-3: 0 14px 40px rgba(0,0,0,.5);
+
+  /* ---- BORDERS ---- */
+  --bd-1: 1px; --bd-2: 2px; --bd-accent: 4px;
+
+  /* ---- MOTION ---- */
+  --dur-fast: 120ms; --dur-base: 200ms; --dur-slow: 360ms;
+  --ease: cubic-bezier(.2,.7,.2,1);
+
+  /* ---- Z-INDEX ---- */
+  --z-base: 1; --z-overlay: 100; --z-modal: 200; --z-toast: 300;
+
+  /* ---- SEMANTIC (brand-stable) ---- */
+  --accent:       var(--braise);
+  --accent-press: var(--braise-600);
+  --accent-2:     var(--or);
+  --accent-2-press: var(--or-600);
+  --link:         var(--or);          /* soul-link gold */
+  --hp-ok:        var(--green);
+  --hp-low:       var(--yellow);
+  --hp-crit:      var(--red);
+}
+
+/* ---- DARK THEME (in-game overlay) — default ---- */
+:root,
+[data-theme="dark"] {
+  --bg:        var(--n-900);
+  --surface:   var(--n-800);
+  --surface-2: var(--n-700);
+  --line:      var(--n-700);
+  --text:      var(--n-100);
+  --text-muted:var(--n-300);
+  --on-accent: var(--white);
+  --field-bg:  rgba(255,255,255,.06);
+}
+
+/* ---- LIGHT THEME (menus) ---- */
+[data-theme="light"] {
+  --bg:        var(--n-50);
+  --surface:   var(--n-0);
+  --surface-2: var(--n-100);
+  --line:      var(--n-200);
+  --text:      var(--ink);
+  --text-muted:var(--n-500);
+  --on-accent: var(--white);
+  --field-bg:  var(--n-50);
+}

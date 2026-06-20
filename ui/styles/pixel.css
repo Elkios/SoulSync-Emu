@@ -1,0 +1,82 @@
+/* =============================================================================
+   SoulSync — Pixel-art skin. Layer ON TOP of components.css.
+   Activate with [data-skin="pixel"] on <html>. Techniques: sharp corners,
+   hard (blur-less) shadows, beveled edges, pixel font on labels, pixelated images.
+   ============================================================================= */
+
+[data-skin="pixel"] {
+  --px: 3px;
+}
+
+/* crisp sprites/images everywhere */
+[data-skin="pixel"] img,
+[data-skin="pixel"] canvas,
+[data-skin="pixel"] .mon__pic { image-rendering: pixelated; }
+
+/* surfaces: sharp corners + thick flat border + hard drop shadow */
+[data-skin="pixel"] .card,
+[data-skin="pixel"] .panel,
+[data-skin="pixel"] .mon,
+[data-skin="pixel"] .toast,
+[data-skin="pixel"] .player-row,
+[data-skin="pixel"] .modal {
+  border-radius: 0;
+  border-width: var(--bd-2);
+  box-shadow: var(--px) var(--px) 0 rgba(0,0,0,.55);
+}
+
+/* buttons: chunky beveled pixel buttons with pixel font */
+[data-skin="pixel"] .btn {
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-3);
+  letter-spacing: .5px;
+  padding-block: var(--sp-2);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.30),
+    inset -2px -2px 0 rgba(0,0,0,.45),
+    var(--px) var(--px) 0 rgba(0,0,0,.55);
+}
+[data-skin="pixel"] .btn:hover { filter: brightness(1.1); }
+[data-skin="pixel"] .btn:active {
+  transform: translate(var(--px), var(--px));
+  box-shadow:
+    inset -2px -2px 0 rgba(255,255,255,.18),
+    inset 2px 2px 0 rgba(0,0,0,.45);
+}
+[data-skin="pixel"] .btn:disabled { box-shadow: inset 2px 2px 0 rgba(255,255,255,.12), inset -2px -2px 0 rgba(0,0,0,.3); transform: none; }
+
+/* inputs: sunken/inset bevel */
+[data-skin="pixel"] .input {
+  border-radius: 0;
+  border-width: var(--bd-2);
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,.4);
+}
+
+/* badges + tabs: sharp, outlined */
+[data-skin="pixel"] .badge { border-radius: 0; box-shadow: inset 0 0 0 1px currentColor; }
+[data-skin="pixel"] .tabs { border-radius: 0; }
+[data-skin="pixel"] .tab  { border-radius: 0; }
+[data-skin="pixel"] .tab.is-active { box-shadow: inset 2px 2px 0 rgba(255,255,255,.3), inset -2px -2px 0 rgba(0,0,0,.4); }
+
+/* HP bar: hard edges, dark frame, pixel segments */
+[data-skin="pixel"] .hpbar {
+  border-radius: 0; border: var(--bd-2) solid var(--ink); background: rgba(0,0,0,.55);
+}
+[data-skin="pixel"] .hpbar__fill {
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 2px, transparent 2px 7px);
+}
+
+/* toggle: square */
+[data-skin="pixel"] .toggle__track,
+[data-skin="pixel"] .toggle__track::after { border-radius: 0; }
+
+/* mon pic: square pixel frame instead of round */
+[data-skin="pixel"] .mon__pic {
+  border-radius: 0; border: var(--bd-2) solid var(--ink);
+  box-shadow: inset -2px -2px 0 rgba(0,0,0,.35);
+  background: var(--surface-2);
+}
+
+/* headings get the display font already; nudge body labels toward pixel where it reads well */
+[data-skin="pixel"] .h3 { letter-spacing: 2px; }

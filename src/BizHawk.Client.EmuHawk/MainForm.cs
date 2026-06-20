@@ -81,11 +81,11 @@ namespace BizHawk.Client.EmuHawk
 		{
 			UpdateWindowTitle();
 
-			// SoulSync : panneau dashboard docké à droite, toggle via le menu
-			_soulSyncPanel = new SoulSyncPanel { Dock = DockStyle.Right, Visible = false };
+			// SoulSync : panneau dashboard docké à droite, OUVERT par défaut + toggle via le menu
+			_soulSyncPanel = new SoulSyncPanel { Dock = DockStyle.Right, Visible = true };
 			Controls.InsertBefore(MainformMenu, insert: _soulSyncPanel);
 			var soulSyncMenu = new ToolStripMenuItem("SoulSync");
-			var toggleDashItem = new ToolStripMenuItem("Dashboard") { CheckOnClick = true };
+			var toggleDashItem = new ToolStripMenuItem("Dashboard") { CheckOnClick = true, Checked = true };
 			toggleDashItem.Click += (_, _) =>
 			{
 				var show = toggleDashItem.Checked;
@@ -95,6 +95,13 @@ namespace BizHawk.Client.EmuHawk
 			};
 			soulSyncMenu.DropDownItems.Add(toggleDashItem);
 			MainformMenu.Items.Add(soulSyncMenu);
+
+			// Affiche le panneau dès le démarrage (plus besoin de cliquer le menu).
+			Shown += (_, _) =>
+			{
+				_soulSyncPanel.EnsureStarted();
+				Width += _soulSyncPanel.Width;
+			};
 
 			Slot1StatusButton.Tag = SelectSlot1MenuItem.Tag = 1;
 			Slot2StatusButton.Tag = SelectSlot2MenuItem.Tag = 2;

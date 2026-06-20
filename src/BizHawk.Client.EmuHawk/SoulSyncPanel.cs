@@ -23,7 +23,7 @@ namespace BizHawk.Client.EmuHawk
 
 		public SoulSyncPanel()
 		{
-			Width = 380;
+			Width = 430;
 			BackColor = System.Drawing.Color.FromArgb(10, 19, 34);
 			_web = new WebView2 { Dock = DockStyle.Fill };
 			Controls.Add(_web);
@@ -44,7 +44,19 @@ namespace BizHawk.Client.EmuHawk
 				var userDataFolder = Path.Combine(Path.GetTempPath(), "SoulSyncWebView2");
 				var env = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
 				await _web.EnsureCoreWebView2Async(env);
-				_web.CoreWebView2.NavigateToString(PlaceholderHtml);
+
+				var uiDir = ResolveUiDir();
+				if (uiDir is not null)
+				{
+					// Sert le dossier ui/ via un hôte virtuel : la WebView charge le vrai dashboard.
+					_web.CoreWebView2.SetVirtualHostNameToFolderMapping(
+						"soulsync.ui", uiDir, CoreWebView2HostResourceAccessKind.Allow);
+					_web.CoreWebView2.Navigate("https://soulsync.ui/index.html");
+				}
+				else
+				{
+					_web.CoreWebView2.NavigateToString(PlaceholderHtml); // repli
+				}
 			}
 			catch (Exception ex)
 			{
@@ -59,6 +71,18 @@ namespace BizHawk.Client.EmuHawk
 						+ "\nInstalle le runtime Microsoft Edge WebView2.",
 				});
 			}
+		}
+
+		/// <summary>Locates the repo's ui/ folder relative to the exe (dev or packaged).</summary>
+		private static string? ResolveUiDir()
+		{
+			var baseDir = AppContext.BaseDirectory;
+			foreach (var rel in new[] { "ui", "../ui", "../../ui", "../../../ui" })
+			{
+				var p = Path.GetFullPath(Path.Combine(baseDir, rel));
+				if (File.Exists(Path.Combine(p, "dashboard.html"))) return p;
+			}
+			return null;
 		}
 
 		private const string PlaceholderHtml = @"<!doctype html>

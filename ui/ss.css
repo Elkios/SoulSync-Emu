@@ -1,0 +1,106 @@
+/* =============================================================================
+   SoulSync — shared mockup style (B2W2 direction). Used by all screen mockups.
+   ============================================================================= */
+@font-face { font-family:'PokemonDS'; src:url('pokemon-ds.ttf'); }
+
+:root{
+  --braise:#e6392c; --or:#f5c451; --ink:#0a0d14;
+  --green:#5ad94e; --yellow:#ffd23f; --red:#ff4d57;
+  --p1:#e6392c; --p2:#36d1dc; --p3:#a78bfa; --p4:#ff9f45;
+  --blue-1:#3f6bb8; --blue-2:#1d3568; --bevel:#eaf4ff; --bevel-2:#86a9da;
+  --txt:#fff; --mut:#bcd0f0; --fill:#161a24;
+  --ds:'PokemonDS', system-ui, sans-serif; --ui:'Segoe UI', system-ui, sans-serif;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; min-height:100vh; color:var(--txt); font-family:var(--ds);
+  background:linear-gradient(#0a1530cc,#0a1530cc),
+    repeating-linear-gradient(0deg,#11244a 0 1px,transparent 1px 26px),
+    repeating-linear-gradient(90deg,#11244a 0 1px,transparent 1px 26px),
+    radial-gradient(120% 90% at 50% 0%, #1c3a6e, #0a1428);
+  background-color:#0a1428; }
+.ui{ font-family:var(--ui); }
+.muted{ color:var(--mut); font-family:var(--ui); }
+h1,h2,h3{ font-weight:400; text-shadow:1px 1px 0 #000a; margin:0; }
+
+/* clip shapes */
+.cut{ clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px); }
+.banner{ clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%); }
+
+/* glossy blue panel (the B2W2 box) */
+.panel{ clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px);
+  background:linear-gradient(180deg,var(--bevel),var(--bevel-2)); padding:3px; }
+.panel > .in{ clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);
+  background:linear-gradient(180deg,#274a86,#152a52); padding:18px; }
+
+/* hex button (thick) */
+.hx{ --accent:#888; --htxt:#fff; display:inline-block; cursor:pointer; border:none; background:none; padding:0; text-decoration:none; }
+.hx .o{ clip-path:polygon(13px 0,calc(100% - 13px) 0,100% 50%,calc(100% - 13px) 100%,13px 100%,0 50%);
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(0,0,0,.5)),var(--accent); padding:5px; transition:transform .06s ease; }
+.hx .i{ clip-path:polygon(13px 0,calc(100% - 13px) 0,100% 50%,calc(100% - 13px) 100%,13px 100%,0 50%);
+  background:var(--fill); background-image:radial-gradient(rgba(255,255,255,.12) 1px,transparent 1.4px); background-size:5px 5px;
+  color:var(--htxt); font-family:var(--ds); font-size:20px; letter-spacing:1px; padding:12px 30px; text-align:center; text-shadow:1px 1px 0 #000b; white-space:nowrap; }
+.hx:active .o{ transform:translateY(2px); }
+.hx.braise{ --accent:#e6392c; --htxt:#ff7a6a; } .hx.gold{ --accent:#f5c451; --htxt:#fff3c4; }
+.hx.blue{ --accent:#36a3dc; --htxt:#bfe9ff; } .hx.green{ --accent:#3fae54; --htxt:#caf5cf; }
+.hx.lg .i{ font-size:26px; padding:16px 44px; }
+
+/* HP bar */
+.hp{ height:8px; background:#0a1730; border:1px solid #000; border-radius:4px; overflow:hidden; }
+.hp > i{ display:block; height:100%; background:linear-gradient(180deg,#9be88a,#46c850); border-radius:4px; }
+.hp > i.low{ background:linear-gradient(180deg,#ffe27a,#f0c040); } .hp > i.crit{ background:linear-gradient(180deg,#ff8a90,#e0454f); }
+
+/* party slot (banner) */
+.slot{ background:linear-gradient(180deg,#eaf4ff,#86a9da); padding:2px;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%); }
+.slot .in{ clip-path:polygon(0 0,calc(100% - 13px) 0,100% 50%,calc(100% - 13px) 100%,0 100%);
+  background:linear-gradient(180deg,#3f6bb8,#1d3568); display:grid; grid-template-columns:46px 1fr; gap:6px; align-items:center; padding:4px 16px 4px 4px; }
+.slot.fainted{ filter:grayscale(.85) brightness(.8); } .slot.fainted .in{ background:linear-gradient(180deg,#5a5f6b,#2c3038); }
+.pic{ width:46px; height:42px; display:grid; place-items:center; position:relative; }
+.pic img{ max-width:100%; max-height:100%; filter:drop-shadow(1px 1px 0 #0006); }
+.nick{ font-size:18px; text-shadow:1px 1px 0 #000a; }
+.hplabel{ font-size:13px; color:var(--or); font-style:italic; }
+
+/* player avatar header */
+.pava{ width:40px; height:40px; border:2px solid #fff; border-radius:8px; overflow:hidden; background:#0e1f40;
+  display:grid; place-items:end center; flex:none; box-shadow:0 2px 0 #0008; }
+.pava img{ width:42px; image-rendering:pixelated; }
+.phead{ display:flex; align-items:center; gap:10px; }
+.pname{ font-size:22px; text-shadow:1px 1px 0 #000a; }
+
+/* generic helpers */
+.center{ display:grid; place-items:center; min-height:100vh; padding:20px; }
+.col{ display:flex; flex-direction:column; }
+.row{ display:flex; }
+.input{ width:100%; padding:10px 12px; font-family:var(--ds); font-size:20px; color:#fff; background:#0e1f40; border:2px solid #34507f; border-radius:8px; }
+.input:focus{ outline:none; border-color:var(--or); }
+
+/* ---- brand wordmark (Jersey 10) ---- */
+.ss-wm{ font-family:'Jersey 10', var(--ds); line-height:.85; display:inline-block; }
+.ss-wm .s{ color:#fff; } .ss-wm .y{ color:var(--or); }
+.ss-logo{ image-rendering:pixelated; filter:drop-shadow(0 5px 0 #0005); }
+.ss-tag{ font-family:'Jersey 10', var(--ds); color:var(--or); text-shadow:1px 1px 0 #000a; }
+
+/* ---- app shell / screens ---- */
+#app{ min-height:100vh; }
+.screen{ max-width:520px; margin:0 auto; padding:22px 16px; }
+.screen-center{ min-height:100vh; display:grid; place-items:center; }
+.topbar{ display:flex; align-items:center; gap:10px; }
+.spacer{ flex:1; }
+.iconbtn{ width:36px; height:36px; display:grid; place-items:center; background:#0e1f40; border:2px solid #34507f; border-radius:8px; cursor:pointer; font-size:16px; text-decoration:none; }
+.stack{ display:flex; flex-direction:column; gap:12px; }
+.hx.block, .hx.block .o, .hx.block .i{ display:block; }
+.sectit{ font-family:var(--ds); font-size:18px; color:var(--or); margin:14px 0 8px; }
+
+/* ---- mon slot details (used by SS.monSlot) ---- */
+.pic{ position:relative; }
+.ball{ position:absolute; left:-2px; top:-2px; width:15px; height:15px; }
+.shiny{ position:absolute; right:-2px; top:-3px; font-size:12px; filter:drop-shadow(0 0 2px #ffd23f); }
+.topline{ display:flex; justify-content:space-between; align-items:baseline; gap:6px; }
+.botline{ display:flex; justify-content:space-between; font-size:12px; color:#dff; }
+.link{ color:var(--or); font-size:11px; }
+.zone{ font-family:var(--ui); font-size:9px; color:#bcd0f0; }
+.zone b{ color:#ffd27a; font-weight:600; }
+.st{ font-family:var(--ui); font-size:8px; font-weight:700; padding:1px 4px; border-radius:3px; color:#fff; }
+.st.psn,.st.tox{ background:#a040a0; } .st.brn{ background:#f08030; } .st.par{ background:#b8a000; } .st.slp{ background:#7a8696; } .st.frz{ background:#48b0c8; }
+.ss-badge{ font-family:var(--ui); font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:#0e1f40; color:var(--mut); }
+.ss-badge.ok{ background:#1c4a23; color:var(--green); } .ss-badge.wait{ background:#3a3412; color:var(--yellow); } .ss-badge.host{ background:#3a1c1a; color:#ff8a7a; }

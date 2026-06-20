@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SoulSync — Dashboard</title>
+<link rel="stylesheet" href="ss.css">
+<style>
+  body{ padding:10px; }
+  .title{ font-family:var(--ds); font-size:20px; color:var(--or); text-align:center; text-shadow:1px 1px 0 #000a; margin:2px 0 10px; }
+  .player{ margin-bottom:14px; }
+  .phead{ margin-bottom:6px; }
+  .party{ display:flex; flex-direction:column; gap:5px; }
+  .slot .in{ padding:3px 14px 3px 3px; }
+  .pic{ width:42px; height:38px; }
+  .ball{ position:absolute; left:-2px; top:-2px; width:15px; height:15px; }
+  .shiny{ position:absolute; right:-2px; top:-3px; font-size:12px; filter:drop-shadow(0 0 2px #ffd23f); }
+  .nick{ font-size:16px; }
+  .topline{ display:flex; justify-content:space-between; align-items:baseline; }
+  .st{ font-family:var(--ui); font-size:8px; font-weight:700; padding:1px 4px; border-radius:3px; color:#fff; }
+  .st.psn,.st.tox{ background:#a040a0; } .st.brn{ background:#f08030; } .st.par{ background:#b8a000; } .st.slp{ background:#7a8696; } .st.frz{ background:#48b0c8; }
+  .botline{ display:flex; justify-content:space-between; font-size:12px; color:#dff; }
+  .link{ color:var(--or); font-size:11px; }
+  .zone{ font-family:var(--ui); font-size:9px; color:#bcd0f0; }
+  .zone b{ color:#ffd27a; font-weight:600; }
+  .boxstrip{ display:flex; align-items:center; gap:5px; margin-top:5px; flex-wrap:wrap; }
+  .boxstrip .label{ font-family:var(--ui); font-size:10px; color:#7e93b8; }
+  .boxmon{ width:26px; height:26px; display:grid; place-items:center; background:#11203f; border:1px solid #2a3f6b; border-radius:5px; filter:grayscale(.4) opacity(.85); }
+  .boxmon img{ max-width:100%; max-height:100%; } .boxmon.dead{ filter:grayscale(1) brightness(.7); }
+  .demo{ position:fixed; bottom:4px; right:6px; font-family:var(--ui); font-size:9px; color:#46618f; }
+</style>
+</head>
+<body>
+  <div class="title">🔗 SOUL LINK</div>
+  <div id="root"></div>
+  <div class="demo" id="demo">demo data</div>
+
+<script>
+const SP=(id,sh)=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${sh?'shiny/':''}${id}.gif`;
+const FB=(id,sh)=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${sh?'shiny/':''}${id}.png`;
+const ITEM=n=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${n}.png`;
+const TR=n=>`https://play.pokemonshowdown.com/sprites/trainers/${n}.png`;
+
+function hpc(r){ return r>0.5?'':r>0.2?'low':'crit'; }
+function slot(m,i){
+  const r=m.max?m.hp/m.max:0, dead=m.hp<=0;
+  const st=m.status?`<span class="st ${m.status}">${m.status.toUpperCase()}</span>`:'';
+  const sh=m.shiny?`<span class="shiny">✨</span>`:'';
+  const ball=m.ball?`<img class="ball" src="${ITEM(m.ball)}" onerror="this.style.display='none'">`:'';
+  return `<div class="slot ${dead?'fainted':''}"><div class="in">
+    <div class="pic">${ball}${sh}<img src="${SP(m.id,m.shiny)}" onerror="this.onerror=null;this.src='${FB(m.id,m.shiny)}'"></div>
+    <div style="flex:1;min-width:0">
+      <div class="topline"><span class="nick">${m.nick}</span>${st}</div>
+      <div class="hp"><i class="${hpc(r)}" style="width:${Math.round(r*100)}%"></i></div>
+      <div class="botline"><span>Lv.${m.lvl} <span class="link">🔗${i+1}</span></span><span>${dead?'KO':m.hp+'/'+m.max}</span></div>
+      <div class="zone">📍 <b>${m.zone||'?'}</b></div>
+    </div></div></div>`;
+}
+function render(state){
+  document.getElementById('demo').style.display = state._demo ? 'block':'none';
+  document.getElementById('root').innerHTML = (state.players||[]).map(p=>{
+    const order=new Map((p.mons||[]).map((m,i)=>[m,i+1]));
+    const party=(p.mons||[]).filter(m=>m.inParty!==false);
+    const box=(p.mons||[]).filter(m=>m.inParty===false);
+    const boxHtml = box.length?`<div class="boxstrip"><span class="label">📦</span>${box.map(m=>`<div class="boxmon ${m.hp<=0?'dead':''}" title="${m.nick}"><img src="${SP(m.id,m.shiny)}" onerror="this.onerror=null;this.src='${FB(m.id,m.shiny)}'"></div>`).join('')}</div>`:'';
+    return `<div class="player"><div class="phead"><span class="pava" style="border-color:${p.color}"><img src="${TR(p.avatar)}" onerror="this.style.display='none'"></span><span class="pname" style="color:${p.color}">${p.name}</span></div>
+      <div class="party">${party.map(m=>slot(m,order.get(m)-1)).join('')}</div>${boxHtml}</div>`;
+  }).join('');
+}
+
+// API for the C# host to push live state:  window.chrome.webview.postMessage / postWebMessageAsJson
+window.soulsync = { update: render };
+window.addEventListener('message', e=>{ try{ render(typeof e.data==='string'?JSON.parse(e.data):e.data); }catch(_){} });
+if (window.chrome && window.chrome.webview) window.chrome.webview.addEventListener('message', e=>{ try{ render(e.data); }catch(_){} });
+
+// demo data until C# pushes real state
+render({ _demo:true, players:[
+  { name:'mathys', color:'#e6392c', avatar:'nate', mons:[
+    {id:6,nick:'Charizard',g:'♂',lvl:62,hp:183,max:183,zone:'Route 20',ball:'ultra-ball',shiny:true},
+    {id:94,nick:'Gengar',lvl:60,hp:120,max:168,zone:'Celestial Tower',ball:'dusk-ball',status:'psn'},
+    {id:130,nick:'Gyarados',lvl:59,hp:40,max:212,zone:'Route 4',status:'par'},
+    {id:25,nick:'Pikachu',lvl:54,hp:0,max:149,zone:'Floccesy Ranch'},
+    {id:9,nick:'Blastoise',lvl:59,hp:163,max:163,zone:'Virbank Complex'},
+    {id:3,nick:'Venusaur',lvl:58,hp:150,max:170,zone:'Pinwheel Forest',inParty:false} ]},
+  { name:'flo', color:'#36d1dc', avatar:'rosa', mons:[
+    {id:448,nick:'Lucario',lvl:62,hp:175,max:181,zone:'Route 20'},
+    {id:445,nick:'Garchomp',lvl:60,hp:90,max:200,zone:'Celestial Tower',status:'brn'},
+    {id:282,nick:'Gardevoir',lvl:59,hp:30,max:158,zone:'Route 4'},
+    {id:197,nick:'Umbreon',lvl:54,hp:0,max:160,zone:'Floccesy Ranch'},
+    {id:248,nick:'Tyranitar',lvl:59,hp:212,max:212,zone:'Virbank Complex',shiny:true},
+    {id:376,nick:'Metagross',lvl:58,hp:188,max:190,zone:'Pinwheel Forest',inParty:false} ]},
+]});
+</script>
+</body>
+</html>

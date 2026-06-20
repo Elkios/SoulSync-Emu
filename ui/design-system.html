@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-skin="pixel">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SoulSync — Design System</title>
+<link rel="icon" href="../docs/assets/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/pixel.css">
+<style>
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 24px 24px 80px; }
+  .topbar { display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:10;
+            background:var(--bg); padding:14px 0; border-bottom:1px solid var(--line); margin-bottom:24px; }
+  .topbar .h1 { font-size: var(--fs-6); }
+  section { margin: 0 0 44px; }
+  .sechead { border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+  .stack { display:flex; flex-direction:column; gap:10px; }
+  .swatch { width:120px; }
+  .swatch .chip { height:64px; border-radius:var(--r-md); border:1px solid #0004; }
+  .swatch small { font-family:monospace; color:var(--text-muted); font-size:11px; }
+  .scale > div { display:flex; align-items:baseline; gap:12px; border-bottom:1px dashed var(--line); padding:6px 0; }
+  .box { display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+  .spacer { background:var(--accent); height:16px; border-radius:4px; }
+  .label { font-size:12px; color:var(--text-muted); font-family:monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <img src="../docs/assets/logo.png" width="40" height="40" style="image-rendering:pixelated">
+    <div class="h1 h-display">SoulSync — Design System</div>
+    <div style="flex:1"></div>
+    <span class="label">Skin</span>
+    <div class="tabs">
+      <button class="tab is-active" data-skin-set="pixel">Pixel</button>
+      <button class="tab" data-skin-set="soft">Soft</button>
+    </div>
+    <span class="label">Theme</span>
+    <div class="tabs">
+      <button class="tab is-active" data-set="dark">Dark</button>
+      <button class="tab" data-set="light">Light</button>
+    </div>
+  </div>
+
+  <!-- COLORS -->
+  <section>
+    <div class="sechead"><span class="h3">01 · Color tokens</span></div>
+    <div class="row" id="swatches"></div>
+  </section>
+
+  <!-- TYPE -->
+  <section>
+    <div class="sechead"><span class="h3">02 · Typography</span></div>
+    <div class="scale">
+      <div><span class="h1">Jersey 10 — Display</span></div>
+      <div><span class="h2">Headlines &amp; big numbers</span></div>
+      <div><span style="font-weight:800;font-size:var(--fs-3)">Nunito 800 — sub-heading</span></div>
+      <div><span style="font-size:var(--fs-2)">Nunito 400 — body text, readable at small sizes.</span></div>
+      <div><span class="num" style="font-size:var(--fs-6);color:var(--accent-2)">Lv.42  21/21</span></div>
+    </div>
+  </section>
+
+  <!-- SPACING / RADII -->
+  <section>
+    <div class="sechead"><span class="h3">03 · Spacing &amp; radii</span></div>
+    <div class="stack" id="spacing"></div>
+    <div class="row" style="margin-top:16px" id="radii"></div>
+  </section>
+
+  <!-- BUTTONS -->
+  <section>
+    <div class="sechead"><span class="h3">04 · Buttons (atom)</span></div>
+    <div class="row">
+      <button class="btn btn--primary">🎲 Randomize &amp; Play</button>
+      <button class="btn btn--gold">Host</button>
+      <button class="btn btn--ghost">Join</button>
+      <button class="btn btn--danger">Game Over</button>
+      <button class="btn">Default</button>
+      <button class="btn btn--primary" disabled>Disabled</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn--primary btn--sm">Small</button>
+      <button class="btn btn--primary">Base</button>
+      <button class="btn btn--primary btn--lg">Large</button>
+    </div>
+  </section>
+
+  <!-- FORM -->
+  <section>
+    <div class="sechead"><span class="h3">05 · Inputs &amp; toggles (atom)</span></div>
+    <div class="row" style="align-items:flex-end">
+      <div style="width:240px"><input class="input" placeholder="Your nickname"></div>
+      <label class="toggle"><input type="checkbox" checked><span class="toggle__track"></span></label>
+      <label class="toggle"><input type="checkbox"><span class="toggle__track"></span></label>
+      <span class="badge badge--link">🔗 link #1</span>
+      <span class="badge badge--alive">Alive</span>
+      <span class="badge badge--dead">KO</span>
+      <span class="badge badge--box">📦 Box</span>
+    </div>
+  </section>
+
+  <!-- HP BARS -->
+  <section>
+    <div class="sechead"><span class="h3">06 · HP bar (atom)</span></div>
+    <div class="stack" style="max-width:280px">
+      <div class="hpbar"><div class="hpbar__fill" style="width:90%"></div></div>
+      <div class="hpbar"><div class="hpbar__fill is-low" style="width:42%"></div></div>
+      <div class="hpbar"><div class="hpbar__fill is-crit" style="width:15%"></div></div>
+    </div>
+  </section>
+
+  <!-- MON CARDS -->
+  <section>
+    <div class="sechead"><span class="h3">07 · Mon card (molecule) — states</span></div>
+    <div class="box">
+      <div class="mon">
+        <div class="mon__pic"></div>
+        <div class="mon__body"><span class="mon__name">Charmander</span> <span class="mon__link">🔗 #1</span>
+          <div class="mon__lvl">Lv.12</div><div class="hpbar"><div class="hpbar__fill" style="width:80%"></div></div></div>
+      </div>
+      <div class="mon is-critical">
+        <div class="mon__pic"></div>
+        <div class="mon__body"><span class="mon__name">Garchomp</span> <span class="mon__link">🔗 #2</span>
+          <div class="mon__lvl">Lv.14</div><div class="hpbar"><div class="hpbar__fill is-crit" style="width:14%"></div></div></div>
+      </div>
+      <div class="mon is-fainted">
+        <div class="mon__pic"></div>
+        <div class="mon__body"><span class="mon__name">Snivy ✖</span>
+          <div class="mon__lvl">Lv.10</div><div class="hpbar"><div class="hpbar__fill is-crit" style="width:0%"></div></div></div>
+      </div>
+      <div class="mon is-boxed">
+        <div class="mon__pic"></div>
+        <div class="mon__body"><span class="mon__name">Pidgey</span> <span class="badge badge--box">📦 Box</span>
+          <div class="mon__lvl">Lv.7</div><div class="hpbar"><div class="hpbar__fill" style="width:100%"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOASTS -->
+  <section>
+    <div class="sechead"><span class="h3">08 · Toasts (molecule)</span></div>
+    <div class="stack" style="max-width:420px">
+      <div class="toast toast--catch">🎉 <b>Charmander</b> was caught!</div>
+      <div class="toast toast--death">💀 <b>Garchomp</b> fainted — its link is broken.</div>
+      <div class="toast toast--cascade">🔗 <b>Snivy</b> falls with its soul-linked partner.</div>
+      <div class="toast toast--evolve">✨ <b>Charmeleon</b> evolved!</div>
+    </div>
+  </section>
+
+  <!-- LOBBY -->
+  <section>
+    <div class="sechead"><span class="h3">09 · Player rows (organism)</span></div>
+    <div class="stack" style="max-width:420px">
+      <div class="player-row"><span class="player-dot" style="background:var(--player-1)"></span><span class="player-row__name">mathys (host)</span><span class="badge badge--alive">ROM ready</span></div>
+      <div class="player-row"><span class="player-dot" style="background:var(--player-2)"></span><span class="player-row__name">flo</span><span class="badge badge--box">waiting</span></div>
+      <div class="player-row"><span class="player-dot" style="background:var(--player-3)"></span><span class="player-row__name">quentin</span><span class="badge badge--alive">ROM ready</span></div>
+    </div>
+  </section>
+
+  <!-- PATTERNS -->
+  <section>
+    <div class="sechead"><span class="h3">10 · Patterns — empty &amp; loading</span></div>
+    <div class="row">
+      <div class="card" style="width:240px"><div class="empty">No team yet.<br>Catch your first Pokémon!</div></div>
+      <div class="card" style="width:240px">
+        <div class="skeleton" style="height:14px;width:60%;margin-bottom:10px"></div>
+        <div class="skeleton" style="height:9px;width:100%"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // theme toggle
+  document.querySelectorAll('.tab[data-set]').forEach(b=>b.onclick=()=>{
+    document.documentElement.setAttribute('data-theme', b.dataset.set);
+    document.querySelectorAll('.tab[data-set]').forEach(x=>x.classList.toggle('is-active', x===b));
+  });
+  // skin toggle (pixel <-> soft). "soft" = remove data-skin so only components.css applies.
+  document.querySelectorAll('.tab[data-skin-set]').forEach(b=>b.onclick=()=>{
+    const s=b.dataset.skinSet;
+    if(s==='pixel') document.documentElement.setAttribute('data-skin','pixel');
+    else document.documentElement.removeAttribute('data-skin');
+    document.querySelectorAll('.tab[data-skin-set]').forEach(x=>x.classList.toggle('is-active', x===b));
+  });
+  // color swatches
+  const COLORS=[['accent','--accent'],['accent-2 / link','--accent-2'],['ink','--ink'],['surface','--surface'],
+    ['line','--line'],['text','--text'],['hp-ok','--hp-ok'],['hp-low','--hp-low'],['hp-crit','--hp-crit'],
+    ['player-1','--player-1'],['player-2','--player-2'],['player-3','--player-3'],['player-4','--player-4']];
+  document.getElementById('swatches').innerHTML = COLORS.map(([n,v])=>
+    `<div class="swatch"><div class="chip" style="background:var(${v})"></div><div>${n}</div><small>${v}</small></div>`).join('');
+  // spacing
+  document.getElementById('spacing').innerHTML = [1,2,3,4,5,6,7,8].map(i=>
+    `<div style="display:flex;align-items:center;gap:10px"><span class="label" style="width:60px">--sp-${i}</span><div class="spacer" style="width:var(--sp-${i})"></div></div>`).join('');
+  // radii
+  document.getElementById('radii').innerHTML = ['sm','md','lg','xl'].map(r=>
+    `<div style="text-align:center"><div style="width:70px;height:50px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-${r})"></div><small class="label">--r-${r}</small></div>`).join('');
+</script>
+</body>
+</html>
