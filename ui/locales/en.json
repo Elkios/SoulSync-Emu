@@ -1,0 +1,44 @@
+{
+  "_meta": { "name": "English", "code": "en", "authors": ["SoulSync"] },
+
+  "app.tagline": "Your souls, linked in real time.",
+
+  "menu.host": "Host",
+  "menu.join": "Join",
+  "menu.solo": "Solo",
+  "menu.settings": "Settings",
+  "menu.play": "Randomize & Play",
+  "menu.resume": "Resume",
+
+  "lobby.title": "Lobby",
+  "lobby.share": "Share this link with your crew",
+  "lobby.players": "Players",
+  "lobby.romReady": "ROM ready",
+  "lobby.waitingHost": "Waiting for the host…",
+  "lobby.start": "Play (everyone)",
+  "lobby.rules": "Game rules",
+
+  "dashboard.team": "Team",
+  "dashboard.graveyard": "Graveyard",
+  "dashboard.box": "Box",
+  "dashboard.level": "Lv.",
+  "dashboard.alive": "Alive",
+  "dashboard.fainted": "Fainted",
+  "dashboard.boxed": "Boxed",
+
+  "notify.caught": "{name} was caught!",
+  "notify.death": "{name} fainted — its link is broken.",
+  "notify.cascade": "{name} falls with its soul-linked partner.",
+  "notify.evolve": "{name} evolved!",
+  "notify.launching": "Here we go! The emulator is starting…",
+
+  "gameover.title": "Game Over",
+  "gameover.subtitle": "The team has wiped.",
+  "gameover.restart": "Restart",
+  "gameover.close": "Close",
+
+  "rule.soulLink": "Soul Link",
+  "rule.speciesClause": "Species clause",
+  "rule.protectFirstBattle": "First battle is non-lethal",
+  "rule.levelCap": "Level cap"
+}

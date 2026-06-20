@@ -1,0 +1,44 @@
+{
+  "_meta": { "name": "Français", "code": "fr", "authors": ["SoulSync"] },
+
+  "app.tagline": "Vos âmes liées, en temps réel.",
+
+  "menu.host": "Héberger",
+  "menu.join": "Rejoindre",
+  "menu.solo": "Solo",
+  "menu.settings": "Réglages",
+  "menu.play": "Randomiser & Jouer",
+  "menu.resume": "Reprendre",
+
+  "lobby.title": "Salon",
+  "lobby.share": "Partage ce lien à ta team",
+  "lobby.players": "Joueurs",
+  "lobby.romReady": "ROM prête",
+  "lobby.waitingHost": "En attente de l'hôte…",
+  "lobby.start": "Jouer (tous)",
+  "lobby.rules": "Règles du jeu",
+
+  "dashboard.team": "Équipe",
+  "dashboard.graveyard": "Cimetière",
+  "dashboard.box": "Boîte",
+  "dashboard.level": "Niv.",
+  "dashboard.alive": "En vie",
+  "dashboard.fainted": "K.O.",
+  "dashboard.boxed": "En boîte",
+
+  "notify.caught": "{name} a été capturé !",
+  "notify.death": "{name} est tombé — son lien est rompu.",
+  "notify.cascade": "{name} tombe avec son partenaire d'âme.",
+  "notify.evolve": "{name} a évolué !",
+  "notify.launching": "C'est parti ! L'émulateur se lance…",
+
+  "gameover.title": "Game Over",
+  "gameover.subtitle": "L'équipe a été décimée.",
+  "gameover.restart": "Recommencer",
+  "gameover.close": "Fermer",
+
+  "rule.soulLink": "Soul Link",
+  "rule.speciesClause": "Clause d'espèce",
+  "rule.protectFirstBattle": "Premier combat non éliminatoire",
+  "rule.levelCap": "Niveau plafond"
+}
