@@ -81,26 +81,25 @@ namespace BizHawk.Client.EmuHawk
 		{
 			UpdateWindowTitle();
 
-			// SoulSync : panneau dashboard docké à droite, OUVERT par défaut + toggle via le menu
-			_soulSyncPanel = new SoulSyncPanel { Dock = DockStyle.Right, Visible = true };
+			// SoulSync : panneau plein écran pour les menus (Fill), réduit à droite en jeu.
+			// Le mode est commuté par message JS (mode:menu / mode:ingame) depuis la WebView.
+			_soulSyncPanel = new SoulSyncPanel { Dock = DockStyle.Fill, Visible = true };
 			Controls.InsertBefore(MainformMenu, insert: _soulSyncPanel);
 			var soulSyncMenu = new ToolStripMenuItem("SoulSync");
-			var toggleDashItem = new ToolStripMenuItem("Dashboard") { CheckOnClick = true, Checked = true };
+			var toggleDashItem = new ToolStripMenuItem("Show SoulSync") { CheckOnClick = true, Checked = true };
 			toggleDashItem.Click += (_, _) =>
 			{
-				var show = toggleDashItem.Checked;
-				_soulSyncPanel.Visible = show;
-				if (show) _soulSyncPanel.EnsureStarted();
-				Width += show ? _soulSyncPanel.Width : -_soulSyncPanel.Width;
+				_soulSyncPanel.Visible = toggleDashItem.Checked;
+				if (toggleDashItem.Checked) { _soulSyncPanel.EnsureStarted(); _soulSyncPanel.BringToFront(); }
 			};
 			soulSyncMenu.DropDownItems.Add(toggleDashItem);
 			MainformMenu.Items.Add(soulSyncMenu);
 
-			// Affiche le panneau dès le démarrage (plus besoin de cliquer le menu).
+			// Affiche le panneau dès le démarrage (plein écran sur les menus).
 			Shown += (_, _) =>
 			{
 				_soulSyncPanel.EnsureStarted();
-				Width += _soulSyncPanel.Width;
+				_soulSyncPanel.BringToFront();
 			};
 
 			Slot1StatusButton.Tag = SelectSlot1MenuItem.Tag = 1;

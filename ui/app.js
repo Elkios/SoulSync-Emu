@@ -118,6 +118,7 @@ const Screens = {
 
   loading() {
     setTimeout(() => { const b = document.getElementById('ldbar'); if (b) b.style.width = '100%'; }, 50);
+    setTimeout(() => { if (document.getElementById('ldbar')) navigate('dashboard'); }, 3800);
     return `<div class="screen-center"><div style="text-align:center">
       <img src="${SS.item('poke-ball')}" style="width:80px;height:80px;image-rendering:pixelated;animation:spin 1.1s steps(8) infinite">
       <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
@@ -143,6 +144,84 @@ const Screens = {
         ${SS.optRow('Status', `<span style="color:var(--green);font-family:var(--ui);font-size:13px">● Connected</span>`)}`)}
     </div>`;
   },
+
+  // ---- IN-GAME (narrow right panel) ----
+  dashboard() {
+    const D = [
+      { name: 'mathys', color: '#e6392c', avatar: 'nate', mons: [
+        { id: 6, nick: 'Charizard', lvl: 62, hp: 183, max: 183, zone: 'Route 20', ball: 'ultra-ball', shiny: true },
+        { id: 94, nick: 'Gengar', lvl: 60, hp: 120, max: 168, zone: 'Celestial Tower', status: 'psn' },
+        { id: 130, nick: 'Gyarados', lvl: 59, hp: 40, max: 212, zone: 'Route 4', status: 'par' },
+        { id: 25, nick: 'Pikachu', lvl: 54, hp: 0, max: 149, zone: 'Floccesy Ranch' },
+        { id: 3, nick: 'Venusaur', lvl: 58, hp: 150, max: 170, zone: 'Pinwheel Forest', inParty: false } ] },
+      { name: 'flo', color: '#36d1dc', avatar: 'rosa', mons: [
+        { id: 448, nick: 'Lucario', lvl: 62, hp: 175, max: 181, zone: 'Route 20' },
+        { id: 445, nick: 'Garchomp', lvl: 60, hp: 90, max: 200, zone: 'Celestial Tower', status: 'brn' },
+        { id: 282, nick: 'Gardevoir', lvl: 59, hp: 30, max: 158, zone: 'Route 4' },
+        { id: 197, nick: 'Umbreon', lvl: 54, hp: 0, max: 160, zone: 'Floccesy Ranch' },
+        { id: 248, nick: 'Tyranitar', lvl: 59, hp: 212, max: 212, zone: 'Virbank', shiny: true } ] },
+    ];
+    const block = p => {
+      const party = p.mons.filter(m => m.inParty !== false), box = p.mons.filter(m => m.inParty === false);
+      const boxHtml = box.length ? `<div class="boxstrip"><span class="label">📦</span>${box.map(m => `<div class="boxmon ${m.hp <= 0 ? 'dead' : ''}" title="${m.nick}"><img src="${SS.sprite(m.id, m.shiny)}" onerror="this.onerror=null;this.src='${SS.spriteFb(m.id, m.shiny)}'"></div>`).join('')}</div>` : '';
+      return `<div style="margin-bottom:12px">${SS.playerHeader(p)}<div class="party" style="margin-top:6px">${party.map((m, i) => SS.monSlot(m, i + 1)).join('')}</div>${boxHtml}</div>`;
+    };
+    return `<div style="padding:8px">
+      <div class="topbar" style="margin-bottom:8px">
+        <span class="ss-tag" style="font-size:18px">🔗 SOUL LINK</span><div class="spacer"></div>
+        ${SS.iconBtn('🗺️', 'routes')}${SS.iconBtn('🪦', 'graveyard')}${SS.iconBtn('✕', 'home')}</div>
+      ${D.map(block).join('')}
+    </div>`;
+  },
+
+  gameover() {
+    const fallen = [[503, 'Oshawott'], [497, 'Snivy'], [500, 'Tepig'], [530, 'Drilbur'], [635, 'Deino'], [610, 'Axew']];
+    return `<div class="screen-center" style="background:radial-gradient(120% 80% at 50% 30%,#2a0d0d,#0a0d14)"><div style="text-align:center">
+      <div class="ss-wm" style="font-size:84px;color:var(--red);text-shadow:0 0 20px #f006,3px 3px 0 #000">GAME OVER</div>
+      <div class="ss-tag" style="font-size:24px;color:#fff;margin:4px 0">flo's team has been wiped out.</div>
+      <div class="muted" style="margin-bottom:20px">The soul links are severed — the run ends for everyone. 💔</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
+        ${fallen.map(([id, n]) => `<div style="width:64px;text-align:center"><div style="filter:grayscale(1) brightness(.7);position:relative"><img src="${SS.spriteFb(id)}" style="width:50px"><div style="position:absolute;inset:0;display:grid;place-items:center;font-size:20px">💀</div></div><div class="muted" style="font-size:10px">${n}</div></div>`).join('')}</div>
+      <div style="display:flex;gap:12px;justify-content:center">
+        ${SS.hex({ label: '🎲 RESTART', variant: 'braise', size: 'lg', nav: 'gamepicker' })}
+        ${SS.hex({ label: '🏠 HOME', variant: 'gold', nav: 'home' })}</div>
+    </div></div>`;
+  },
+
+  graveyard() {
+    const PC = { mathys: '#e6392c', flo: '#36d1dc' };
+    const fallen = [
+      { link: 4, zone: 'Floccesy Ranch', cause: 'Critical hit · Route 4', mons: [[25, 'Pikachu', 'mathys'], [197, 'Umbreon', 'flo']] },
+      { link: 6, zone: 'Pinwheel Forest', cause: 'Wiped vs Gym 3', mons: [[3, 'Venusaur', 'mathys'], [376, 'Metagross', 'flo']] },
+    ];
+    return `<div class="screen">
+      <div class="topbar" style="margin-bottom:12px">${SS.iconBtn('←', 'dashboard')}<h1 class="ss-wm" style="font-size:30px">🪦 Graveyard</h1></div>
+      <p class="muted" style="margin-bottom:14px">Gone but linked forever. 🕯️</p>
+      ${fallen.map(g => SS.panel(`<div style="display:flex;align-items:center;gap:12px">
+        <div class="ss-tag" style="font-size:26px;color:#8a90a0">🔗${g.link}</div>
+        <div style="flex:1;display:flex;gap:10px">${g.mons.map(([id, n, who]) => `<div style="text-align:center"><div style="filter:grayscale(1) brightness(.7);position:relative"><img src="${SS.spriteFb(id)}" style="width:46px"><div style="position:absolute;inset:0;display:grid;place-items:center">💀</div></div><div style="font-size:10px;color:${PC[who]}">${n}</div></div>`).join('')}</div>
+        <div class="muted" style="font-size:11px;text-align:right">📍 <span style="color:#ffd27a">${g.zone}</span><br>${g.cause}</div>
+      </div>`, 'grave')).join('<div style="height:10px"></div>')}
+    </div>`;
+  },
+
+  routes() {
+    const PLAYERS = [['mathys', '#e6392c', 'nate'], ['flo', '#36d1dc', 'rosa']];
+    const R = [
+      ['Floccesy Ranch', 'done', [[504, 'Patrat'], [519, 'Pidove']]],
+      ['Route 20', 'done', [[667, 'Litleo'], 'miss']],
+      ['Virbank', 'done', [[568, 'Trubbish', true], [543, 'Venipede']]],
+      ['Route 4', 'open', [[551, 'Sandile'], [551, 'Sandile']]],
+      ['Desert Resort', 'locked', [null, null]],
+    ];
+    const cell = x => x === null ? '<td><span style="color:#5e7aa8">—</span></td>' : x === 'miss' ? '<td><span style="color:#5e7aa8">✖</span></td>' : `<td><div style="text-align:center;${x[2] ? 'filter:grayscale(1) brightness(.7)' : ''}"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${x[0]}.png" style="width:38px"><div style="font-size:9px;color:#cfe">${x[1]}${x[2] ? ' 💀' : ''}</div></div></td>`;
+    const head = '<tr><th style="text-align:left">Route</th>' + PLAYERS.map(p => `<th><span style="color:${p[1]}">${p[0]}</span></th>`).join('') + '</tr>';
+    const rows = R.map(([nm, st, c]) => `<tr><td style="text-align:left"><div class="pname" style="font-size:15px">${nm}</div><span class="ss-badge ${st === 'done' ? 'ok' : st === 'open' ? 'wait' : ''}">${st === 'done' ? '✓' : st === 'open' ? '● ENCOUNTER' : '🔒'}</span></td>${c.map(cell).join('')}</tr>`).join('');
+    return `<div class="screen">
+      <div class="topbar" style="margin-bottom:12px">${SS.iconBtn('←', 'dashboard')}<h1 class="ss-wm" style="font-size:30px">🗺️ Routes</h1></div>
+      <table style="width:100%;border-collapse:separate;border-spacing:0 6px;font-family:var(--ds)"><style>td,th{background:#13284f;padding:6px;text-align:center;font-weight:400}th{color:var(--mut)}</style>${head}${rows}</table>
+    </div>`;
+  },
 };
 
 // --- router ---
@@ -150,6 +229,8 @@ function navigate(name) {
   const s = Screens[name] || Screens.home;
   document.getElementById('app').innerHTML = s();
   window.scrollTo(0, 0);
+  // tell the C# host to switch window mode: in-game = narrow right panel, else full-window menus
+  try { window.chrome.webview.postMessage(name === 'dashboard' ? 'mode:ingame' : 'mode:menu'); } catch (_) { }
 }
 document.addEventListener('click', e => {
   const nav = e.target.closest('[data-nav]');

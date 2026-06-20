@@ -44,6 +44,7 @@ namespace BizHawk.Client.EmuHawk
 				var userDataFolder = Path.Combine(Path.GetTempPath(), "SoulSyncWebView2");
 				var env = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
 				await _web.EnsureCoreWebView2Async(env);
+				_web.CoreWebView2.WebMessageReceived += OnWebMessage;
 
 				var uiDir = ResolveUiDir();
 				if (uiDir is not null)
@@ -71,6 +72,16 @@ namespace BizHawk.Client.EmuHawk
 						+ "\nInstalle le runtime Microsoft Edge WebView2.",
 				});
 			}
+		}
+
+		/// <summary>UI -> host messages: switch full-screen (menus) vs narrow right panel (in-game).</summary>
+		private void OnWebMessage(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+		{
+			string msg;
+			try { msg = e.TryGetWebMessageAsString(); } catch { return; }
+			if (msg == "mode:ingame") { Dock = DockStyle.Right; Width = 430; }
+			else if (msg == "mode:menu") { Dock = DockStyle.Fill; }
+			BringToFront();
 		}
 
 		/// <summary>Locates the repo's ui/ folder relative to the exe (dev or packaged).</summary>
