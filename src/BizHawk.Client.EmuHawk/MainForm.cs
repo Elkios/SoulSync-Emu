@@ -95,6 +95,11 @@ namespace BizHawk.Client.EmuHawk
 			soulSyncMenu.DropDownItems.Add(toggleDashItem);
 			MainformMenu.Items.Add(soulSyncMenu);
 
+			// SoulSync LIVE pipeline: reads the running game's RAM each tick, runs the Soul Link
+			// engine, and pushes state/notifications to the dashboard WebView.
+			_soulSyncBridge = new BizHawk.Client.EmuHawk.SoulSync.SoulSyncBridge(() => Emulator, _soulSyncPanel);
+			_soulSyncBridge.Start();
+
 			// Affiche le panneau dès le démarrage (plein écran sur les menus).
 			Shown += (_, _) =>
 			{
@@ -1761,6 +1766,8 @@ namespace BizHawk.Client.EmuHawk
 		private readonly PresentationPanel _presentationPanel;
 
 		private SoulSyncPanel _soulSyncPanel;
+
+		private BizHawk.Client.EmuHawk.SoulSync.SoulSyncBridge _soulSyncBridge;
 
 		// countdown for saveram autoflushing
 		public int AutoFlushSaveRamIn { get; set; }

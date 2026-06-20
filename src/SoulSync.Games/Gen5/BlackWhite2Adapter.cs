@@ -22,6 +22,13 @@ namespace SoulSync.Games.Gen5
         private const int SlotSize = 0xDC;   // 220 bytes per party Pokémon
         private const int PartyMax = 6;
 
+        // World / battle addresses (absolute DS addresses; see docs/RAM_B2W2.md).
+        private const long MapIdAddr = 0x02246848;   // u16, current map (player position)
+        private const long InBattleAddr = 0x021B5178; // u16, == 0x2100 while in battle
+        private const long WildFlagAddr = 0x02257332; // u16 "enemyTID", 0 == wild
+        private const long EnemyBase = 0x02258874;    // decode like a party slot (valid in battle)
+        private const ushort InBattleMagic = 0x2100;
+
         private static readonly (string Region, long Base)[] Candidates =
         {
             ("Black2", 0x0221E3EC),
@@ -56,6 +63,28 @@ namespace SoulSync.Games.Gen5
             return new Party(Id, "Unknown", new List<Mon>());
         }
 
+        // ---------- world / battle reads ----------
+
+        /// <summary>Current map id (the player's position). Drives zone-entry notifications.</summary>
+        public int ReadMapId(IMemoryReader mem) => U16(mem, MapIdAddr);
+
+        /// <summary>True while the game is in a battle (HP only settles at battle end in Gen 5).</summary>
+        public bool IsInBattle(IMemoryReader mem) => U16(mem, InBattleAddr) == InBattleMagic;
+
+        /// <summary>True if the current battle is a wild encounter (enemy trainer id == 0).
+        /// Only meaningful while <see cref="IsInBattle"/> is true.</summary>
+        public bool IsWildBattle(IMemoryReader mem) => U16(mem, WildFlagAddr) == 0;
+
+        /// <summary>National Dex id of the enemy Pokémon. Only valid while in battle.</summary>
+        public int ReadEnemySpecies(IMemoryReader mem)
+        {
+            var pid = U32(mem, EnemyBase);
+            if (pid == 0) return 0;
+            return ReadSpecies(mem, EnemyBase, pid);
+        }
+
+        // ---------- slot decode ----------
+
         /// <summary>Read &amp; decrypt one slot; null if empty/incoherent.</summary>
         private static Mon? ReadSlot(IMemoryReader mem, long baseAddr, int index)
         {
@@ -79,29 +108,66 @@ namespace SoulSync.Games.Gen5
             if (level < 1 || level > 100 || maxHp < 1 || maxHp > 999 || curHp > maxHp)
                 return null;
 
-            int species = ReadSpecies(mem, slot, pid);
-            return new Mon(pid, species, level, curHp, maxHp, InParty: true);
+            // Decrypt the shuffled block region (0x08..0x87) once and read the logical fields.
+            var blocks = DecryptBlocks(mem, slot);
+            var shuffle = (int)(((pid >> 13) & 31) % 24);
+
+            int species = ReadBlockU16(blocks, shuffle, 0x08);
+            int tid = ReadBlockU16(blocks, shuffle, 0x0C);
+            int sid = ReadBlockU16(blocks, shuffle, 0x0E);
+            int metLocation = ReadBlockU16(blocks, shuffle, 0x80);
+            int metLevel = ReadBlockU16(blocks, shuffle, 0x84) & 0xFF;
+            bool shiny = IsShiny(tid, sid, pid);
+
+            return new Mon(pid, species, level, curHp, maxHp, InParty: true,
+                MetLocation: metLocation, MetLevel: metLevel, Shiny: shiny);
+        }
+
+        /// <summary>Shiny derivation: (TID ^ SID ^ PID_hi ^ PID_lo) &lt; 8.</summary>
+        private static bool IsShiny(int tid, int sid, uint pid)
+            => (tid ^ sid ^ (int)(pid >> 16) ^ (int)(pid & 0xFFFF)) < 8;
+
+        /// <summary>
+        /// Decrypts the 0x80-byte shuffled block region (logical 0x08..0x87, i.e. 64 u16 words)
+        /// using the checksum-seeded LCG keystream. Returns the plaintext indexed by *physical*
+        /// u16 index (0..63), exactly as it sits in RAM after the PID block-shuffle.
+        /// </summary>
+        private static ushort[] DecryptBlocks(IMemoryReader mem, long slot)
+        {
+            var plain = new ushort[64];
+            uint seed = U16(mem, slot + 0x06); // checksum
+            for (var i = 0; i < 64; i++)
+            {
+                seed = Gen5Crypto.Lcg(seed);
+                var key = (ushort)(seed >> 16);
+                plain[i] = (ushort)(U16(mem, slot + 0x08 + i * 2) ^ key);
+            }
+            return plain;
         }
 
         /// <summary>
-        /// Species (National Dex id) sits at the start of logical Block A, whose physical
-        /// position depends on the PID block-shuffle. Block region (0x08+) is XOR-encrypted
-        /// with a checksum-seeded LCG keystream.
+        /// Reads a u16 at an absolute logical offset (0x08..0x87) from the decrypted block region,
+        /// resolving the PID block-shuffle. Logical layout: A=0x08-0x27, B=0x28-0x47,
+        /// C=0x48-0x67, D=0x68-0x87. Each block is 0x20 bytes (16 u16).
+        /// </summary>
+        private static int ReadBlockU16(ushort[] plain, int shuffle, int logicalOffset)
+        {
+            var blockLetter = (logicalOffset - 0x08) / 0x20;     // 0=A,1=B,2=C,3=D
+            var offsetInBlock = (logicalOffset - 0x08) % 0x20;   // byte offset within the block
+            var physBlock = Gen5Crypto.BlockPos[shuffle * 4 + blockLetter];
+            var physIndex = physBlock * 16 + offsetInBlock / 2;
+            return plain[physIndex];
+        }
+
+        /// <summary>
+        /// Species (National Dex id) sits at the start of logical Block A. Standalone decode used
+        /// for the in-battle enemy slot (which is not part of the party buffer).
         /// </summary>
         private static int ReadSpecies(IMemoryReader mem, long slot, uint pid)
         {
+            var blocks = DecryptBlocks(mem, slot);
             var shuffle = (int)(((pid >> 13) & 31) % 24);
-            var physA = Gen5Crypto.BlockPos[shuffle * 4];
-            var u16Index = physA * 16; // (0x20 * physA) / 2
-
-            uint seed = U16(mem, slot + 0x06); // checksum
-            ushort key = 0;
-            for (var k = 0; k <= u16Index; k++)
-            {
-                seed = Gen5Crypto.Lcg(seed);
-                key = (ushort)(seed >> 16);
-            }
-            return (ushort)(U16(mem, slot + 0x08 + u16Index * 2) ^ key);
+            return ReadBlockU16(blocks, shuffle, 0x08);
         }
     }
 }

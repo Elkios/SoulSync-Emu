@@ -29,6 +29,25 @@ namespace BizHawk.Client.EmuHawk
 			Controls.Add(_web);
 		}
 
+		/// <summary>
+		/// Pushes a JSON message to the dashboard (window.chrome.webview "message" event).
+		/// Safe to call before the WebView2 has finished initialising (no-op until ready) and
+		/// from any thread (marshalled to the UI thread).
+		/// </summary>
+		public void PushToUi(string json)
+		{
+			if (string.IsNullOrEmpty(json)) return;
+			if (InvokeRequired)
+			{
+				if (IsHandleCreated) BeginInvoke(new Action(() => PushToUi(json)));
+				return;
+			}
+			var core = _web.CoreWebView2;
+			if (core is null) return;
+			try { core.PostWebMessageAsJson(json); }
+			catch { /* WebView torn down or not ready: drop this frame */ }
+		}
+
 		/// <summary>Initialise la WebView2 au premier affichage (évite de la créer si jamais ouverte).</summary>
 		public void EnsureStarted()
 		{

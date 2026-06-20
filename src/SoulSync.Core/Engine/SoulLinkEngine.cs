@@ -130,7 +130,7 @@ namespace SoulSync.Core.Engine
         {
             var n = new List<Note>();
             // mark party membership
-            var pids = party.Select(s => s.Pid).ToHashSet();
+            var pids = new HashSet<uint>(party.Select(s => s.Pid));
             foreach (var m in _mons.Where(m => m.Player == player)) m.InParty = pids.Contains(m.Pid);
             foreach (var s in party)
             {

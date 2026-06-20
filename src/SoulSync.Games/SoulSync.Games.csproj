@@ -1,12 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- net8.0 for the SoulSync.sln; net48 so the .NET Framework EmuHawk host can
+         reference the game adapters directly via ProjectReference. -->
+    <TargetFrameworks>net8.0;net48</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../SoulSync.Core/SoulSync.Core.csproj" />
   </ItemGroup>

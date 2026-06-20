@@ -57,6 +57,64 @@ const players = () => [
   { name: 'lea', color: '#ff9f45', avatar: 'bianca', rom: 'Black 2', ready: true },
 ];
 
+// ---------- live state (pushed by the C# host over WebView2) ----------
+// LIVE holds the last "state" message from C# (camelCase JSON). null => use demo.
+let LIVE = null;
+const PALETTE = ['#e6392c', '#36d1dc', '#a78bfa', '#ff9f45']; // mirrors --p1..--p4
+const DEF_AVATARS = ['nate', 'rosa', 'hugh', 'bianca'];       // default avatar per player index
+// TODO: inject a met-location id -> display-name map (src/.../locations.b2w2.json is not
+// reachable from ui/). Until then we just show "Zone <id>".
+let ZONE_NAMES = null;
+const zoneName = z => (z == null || z === '') ? '' : ((ZONE_NAMES && ZONE_NAMES[z]) || ('Zone ' + z));
+
+// Map a contract mon -> the shape SS.monSlot expects ({id,nick,lvl,hp,max,zone,shiny,inParty}).
+function mapLiveMon(m) {
+  const boxed = m.state === 'Boxed' || m.inParty === false;
+  const fainted = m.state === 'Fainted';
+  return {
+    id: m.species,
+    nick: m.nickname || ('#' + m.species),
+    lvl: m.level || 1,
+    hp: fainted ? 0 : (m.hp ?? 0),         // "Fainted" => force empty HP so it renders KO
+    max: m.maxHp ?? m.hp ?? 0,
+    zone: zoneName(m.zone),
+    shiny: !!m.shiny,
+    inParty: !boxed,                        // boxed mons drop into the PC strip
+  };
+}
+// Map a contract state -> dashboard player blocks. Color/avatar are assigned locally:
+// the local player ("me") reuses the profile color/avatar; others cycle the p1..p4 palette.
+function mapLivePlayers(state) {
+  return (state.players || []).map((p, i) => ({
+    name: p.id === 'me' ? APP.nick : (p.name || ('P' + (i + 1))),
+    color: p.id === 'me' ? APP.color : PALETTE[i % PALETTE.length],
+    avatar: p.id === 'me' ? APP.avatar : DEF_AVATARS[i % DEF_AVATARS.length],
+    mons: (p.mons || []).map(mapLiveMon),
+  }));
+}
+
+// Classify a note kind into a toast style. neutral ('') = default gold border (var(--or)).
+function noteKind(kind) {
+  if (kind === 'catch' || kind === 'link') return 'ok';                                  // green
+  if (['faint', 'void', 'cascade', 'blackout', 'gameover'].includes(kind)) return 'bad'; // red
+  return '';                                                                              // zone/dupe/evolve -> gold
+}
+
+// Single entry point for both the WebView2 channel and window 'message' (browser testing).
+function handleHostMessage(data) {
+  let msg = data;
+  if (typeof msg === 'string') { try { msg = JSON.parse(msg); } catch (_) { return; } }
+  if (!msg || typeof msg !== 'object') return;
+  if (msg.type === 'state') {
+    LIVE = msg;
+    if (msg.gameOver) { navigate('gameover'); return; }
+    if (CURRENT === 'dashboard') render();      // re-render in place from live state
+  } else if (msg.type === 'note') {
+    if (msg.text) toast(msg.text, noteKind(msg.kind));
+    if (msg.kind === 'gameover') navigate('gameover');
+  }
+}
+
 // ---------- screens ----------
 const Screens = {
   home() {
@@ -187,7 +245,7 @@ const Screens = {
 
   // ---- IN-GAME (narrow right panel) ----
   dashboard() {
-    const D = [
+    const DEMO = [
       { name: APP.nick, color: APP.color, avatar: APP.avatar, mons: [
         { id: 6, nick: 'Charizard', lvl: 62, hp: 183, max: 183, zone: 'Route 20', ball: 'ultra-ball', shiny: true },
         { id: 94, nick: 'Gengar', lvl: 60, hp: 120, max: 168, zone: 'Celestial Tower', status: 'psn' },
@@ -201,6 +259,8 @@ const Screens = {
         { id: 197, nick: 'Umbreon', lvl: 54, hp: 0, max: 160, zone: 'Floccesy Ranch' },
         { id: 248, nick: 'Tyranitar', lvl: 59, hp: 212, max: 212, zone: 'Virbank', shiny: true } ] },
     ];
+    // Prefer live state pushed by the host; fall back to demo data when offline.
+    const D = LIVE ? mapLivePlayers(LIVE) : DEMO;
     const block = p => {
       const party = p.mons.filter(m => m.inParty !== false), box = p.mons.filter(m => m.inParty === false);
       const boxHtml = box.length ? `<div class="boxstrip"><span class="label">📦</span>${box.map(m => `<div class="boxmon ${m.hp <= 0 ? 'dead' : ''}" title="${m.nick}"><img src="${SS.sprite(m.id, m.shiny)}" onerror="this.onerror=null;this.src='${SS.spriteFb(m.id, m.shiny)}'"></div>`).join('')}</div>` : '';
@@ -301,4 +361,7 @@ function doAction(name, el) {
   await loadLocale(APP.lang);
   const go = () => { CURRENT = (location.hash || '#home').slice(1) || 'home'; render(); try { window.chrome.webview.postMessage(CURRENT === 'dashboard' ? 'mode:ingame' : 'mode:menu'); } catch (_) { } };
   window.addEventListener('hashchange', go); go();
+  // Live state/notes from the C# host (and window.postMessage for browser testing).
+  window.addEventListener('message', e => handleHostMessage(e.data));
+  if (window.chrome && window.chrome.webview) window.chrome.webview.addEventListener('message', e => handleHostMessage(e.data));
 })();

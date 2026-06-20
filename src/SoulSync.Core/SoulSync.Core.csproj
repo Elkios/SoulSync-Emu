@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- net8.0 for the SoulSync.sln (engine, tests, server); net48 so the .NET Framework
+         EmuHawk host can reference this pure-domain engine directly via ProjectReference. -->
+    <TargetFrameworks>net8.0;net48</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -8,4 +10,7 @@
     <!-- Pure domain layer: no BizHawk, no UI, no external packages. -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
 </Project>
