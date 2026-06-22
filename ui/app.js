@@ -62,10 +62,12 @@ const players = () => [
 let LIVE = null;
 const PALETTE = ['#e6392c', '#36d1dc', '#a78bfa', '#ff9f45']; // mirrors --p1..--p4
 const DEF_AVATARS = ['nate', 'rosa', 'hugh', 'bianca'];       // default avatar per player index
-// TODO: inject a met-location id -> display-name map (src/.../locations.b2w2.json is not
-// reachable from ui/). Until then we just show "Zone <id>".
+// Met-location id -> display name, loaded from ui/data/locations.b2w2.json (per UI language).
 let ZONE_NAMES = null;
 const zoneName = z => (z == null || z === '') ? '' : ((ZONE_NAMES && ZONE_NAMES[z]) || ('Zone ' + z));
+async function loadZoneNames() {
+  try { const r = await fetch('data/locations.b2w2.json'); if (r.ok) { const j = await r.json(); ZONE_NAMES = j[APP.lang] || j.en || null; } } catch (_) { }
+}
 
 // Map a contract mon -> the shape SS.monSlot expects ({id,nick,lvl,hp,max,zone,shiny,inParty}).
 function mapLiveMon(m) {
@@ -77,7 +79,7 @@ function mapLiveMon(m) {
     lvl: m.level || 1,
     hp: fainted ? 0 : (m.hp ?? 0),         // "Fainted" => force empty HP so it renders KO
     max: m.maxHp ?? m.hp ?? 0,
-    zone: zoneName(m.zone),
+    zone: m.zone || '',                    // already a location name from the host
     shiny: !!m.shiny,
     inParty: !boxed,                        // boxed mons drop into the PC strip
   };
@@ -98,6 +100,27 @@ function noteKind(kind) {
   if (kind === 'catch' || kind === 'link') return 'ok';                                  // green
   if (['faint', 'void', 'cascade', 'blackout', 'gameover'].includes(kind)) return 'bad'; // red
   return '';                                                                              // zone/dupe/evolve -> gold
+}
+
+// Live "current zone" bar: name + capturable/caught/missed status + the zone's linked
+// Pokémon across the whole team. `D` is the mapped player list (live or demo).
+function zoneBar(cz, D) {
+  if (!cz || !cz.name) return '';
+  const ST = {
+    Open: ['🟢', 'Capturable here', 'ok'], Unseen: ['🟢', 'Capturable here', 'ok'],
+    Caught: ['✅', 'Caught here', 'ok'], Failed: ['❌', 'Encounter missed', 'bad'],
+    Void: ['🔒', 'Link broken', 'bad'], Dead: ['💀', 'Lost', 'bad'],
+  };
+  const s = ST[cz.status] || ST.Open;
+  const group = [];
+  (D || []).forEach(p => (p.mons || []).forEach(m => {
+    if (m.zone === cz.name) group.push({ m, color: p.color });
+  }));
+  const mons = group.map(g => `<span class="zb-mon" style="border-color:${g.color}"><img src="${SS.sprite(g.m.id, g.m.shiny)}" onerror="this.onerror=null;this.src='${SS.spriteFb(g.m.id, g.m.shiny)}'"></span>`).join('');
+  return `<div class="zonebar">
+    <div class="zb-main"><span class="zb-loc">📍 ${cz.name}</span><span class="ss-badge ${s[2]}">${s[0]} ${s[1]}</span></div>
+    ${group.length ? `<div class="zb-group">${mons}</div>` : ''}
+  </div>`;
 }
 
 // Single entry point for both the WebView2 channel and window 'message' (browser testing).
@@ -266,8 +289,10 @@ const Screens = {
       const boxHtml = box.length ? `<div class="boxstrip"><span class="label">📦</span>${box.map(m => `<div class="boxmon ${m.hp <= 0 ? 'dead' : ''}" title="${m.nick}"><img src="${SS.sprite(m.id, m.shiny)}" onerror="this.onerror=null;this.src='${SS.spriteFb(m.id, m.shiny)}'"></div>`).join('')}</div>` : '';
       return `<div style="margin-bottom:12px">${SS.playerHeader(p)}<div class="party" style="margin-top:6px">${party.map((m, i) => SS.monSlot(m, i + 1)).join('')}</div>${boxHtml}</div>`;
     };
+    const cz = LIVE && LIVE.currentZone;
     return `<div style="padding:8px">
-      <div class="topbar" style="margin-bottom:8px"><span class="ss-tag" style="font-size:18px">🔗 SOUL LINK</span><div class="spacer"></div>${SS.iconBtn('🗺️', 'routes')}${SS.iconBtn('🪦', 'graveyard')}${SS.iconBtn('✕', 'home')}</div>
+      <div class="topbar" style="margin-bottom:8px;display:flex;align-items:center;gap:8px">${SS.logo(26)}<span class="ss-tag" style="font-size:18px">SOUL LINK</span><div class="spacer"></div>${SS.iconBtn('🗺️', 'routes')}${SS.iconBtn('🪦', 'graveyard')}${SS.iconBtn('✕', 'home')}</div>
+      ${zoneBar(cz, D)}
       ${D.map(block).join('')}
     </div>`;
   },
@@ -359,6 +384,7 @@ function doAction(name, el) {
   applyTheme(APP.theme);
   if (APP.colorblind) document.documentElement.setAttribute('data-cb', '');
   await loadLocale(APP.lang);
+  await loadZoneNames();
   const go = () => { CURRENT = (location.hash || '#home').slice(1) || 'home'; render(); try { window.chrome.webview.postMessage(CURRENT === 'dashboard' ? 'mode:ingame' : 'mode:menu'); } catch (_) { } };
   window.addEventListener('hashchange', go); go();
   // Live state/notes from the C# host (and window.postMessage for browser testing).

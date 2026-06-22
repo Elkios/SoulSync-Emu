@@ -40,8 +40,12 @@ namespace BizHawk.Client.EmuHawk.SoulSync
 		};
 
 		private BlackWhite2Adapter? _adapter;
-		private int _lastMapId = -1;
 		private bool _started;
+
+		// Current Soul Link zone = the live location NAME from the map header (BlackWhite2Maps).
+		// Sub-maps of one area share a name, so a route is a single zone; unknown headers
+		// (transitions) resolve to null and don't create spurious zones.
+		private string _lastZone = "";
 
 		/// <summary>Display name for the local player, surfaced in the dashboard.</summary>
 		public string LocalPlayerName { get; set; } = "Player 1";
@@ -98,17 +102,18 @@ namespace BizHawk.Client.EmuHawk.SoulSync
 				}
 
 				var notes = new List<Note>();
+				var party = _adapter.ReadParty(_reader);
 
-				// Zone entry: the current map id drives "new zone" notifications.
-				var mapId = _adapter.ReadMapId(_reader);
-				if (mapId != _lastMapId)
+				// Current Soul Link zone = the live location name (sub-maps share a name).
+				var zone = _adapter.ReadLocationName(_reader);
+				if (!string.IsNullOrEmpty(zone) && zone != _lastZone)
 				{
-					_lastMapId = mapId;
-					notes.AddRange(_engine.EnterZone(LocalPlayerId, mapId.ToString()));
+					_lastZone = zone!;
+					notes.AddRange(_engine.EnterZone(LocalPlayerId, zone!));
 				}
 
 				// Live party snapshot → engine derives catches, faints, link cascade, blackout.
-				var party = _adapter.ReadParty(_reader);
+				// A new mon's zone = where the player is now (= where it was caught).
 				var snaps = party.Members.Select(m => new MonSnap(
 					Pid: m.Pid,
 					Species: m.Species,
@@ -116,13 +121,13 @@ namespace BizHawk.Client.EmuHawk.SoulSync
 					Level: m.Level,
 					Hp: m.Hp,
 					MaxHp: m.MaxHp,
-					Zone: m.MetLocation.ToString(),    // capture zone = met location = link key
+					Zone: _lastZone,                   // capture zone = current location name = link key
 					Shiny: m.Shiny,
 					InParty: m.InParty)).ToList();
 				notes.AddRange(_engine.Sync(LocalPlayerId, snaps));
 
 				// Push the full state every tick, then any notifications produced this tick.
-				_panel.PushToUi(SerializeState());
+				_panel.PushToUi(SerializeState(_lastZone));
 				foreach (var note in notes) _panel.PushToUi(SerializeNote(note));
 			}
 			catch
@@ -140,11 +145,18 @@ namespace BizHawk.Client.EmuHawk.SoulSync
 
 		// ---------- JSON contract (camelCase) ----------
 
-		private string SerializeState()
+		private string SerializeState(string currentZone)
 		{
 			var state = _engine.State;
+			ZoneDto? zone = null;
+			if (!string.IsNullOrEmpty(currentZone))
+			{
+				var status = state.Zones.TryGetValue(LocalPlayerId + "|" + currentZone, out var st) ? st : "Open";
+				zone = new ZoneDto(currentZone, status);
+			}
 			var msg = new StateMessage(
 				GameOver: state.GameOver,
+				CurrentZone: zone,
 				Players: state.Players.Select(p => new PlayerDto(
 					p.Id,
 					p.Name,
@@ -164,10 +176,12 @@ namespace BizHawk.Client.EmuHawk.SoulSync
 		}
 
 		// DTOs mirror the contract documented for the WebView (System.Text.Json -> camelCase).
-		private sealed record class StateMessage(bool GameOver, IReadOnlyList<PlayerDto> Players)
+		private sealed record class StateMessage(bool GameOver, ZoneDto? CurrentZone, IReadOnlyList<PlayerDto> Players)
 		{
 			public string Type => "state";
 		}
+
+		private sealed record class ZoneDto(string Name, string Status);
 
 		private sealed record class PlayerDto(string Id, string Name, IReadOnlyList<MonDto> Mons);
 

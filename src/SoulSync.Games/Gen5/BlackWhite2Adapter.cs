@@ -23,7 +23,8 @@ namespace SoulSync.Games.Gen5
         private const int PartyMax = 6;
 
         // World / battle addresses (absolute DS addresses; see docs/RAM_B2W2.md).
-        private const long MapIdAddr = 0x02246848;   // u16, current map (player position)
+        private const long MapIdAddr = 0x02246848;   // u16, current map header (parent)
+        private const long ChildMapAddr = 0x02246860; // u16, current map header (child)
         private const long InBattleAddr = 0x021B5178; // u16, == 0x2100 while in battle
         private const long WildFlagAddr = 0x02257332; // u16 "enemyTID", 0 == wild
         private const long EnemyBase = 0x02258874;    // decode like a party slot (valid in battle)
@@ -67,6 +68,19 @@ namespace SoulSync.Games.Gen5
 
         /// <summary>Current map id (the player's position). Drives zone-entry notifications.</summary>
         public int ReadMapId(IMemoryReader mem) => U16(mem, MapIdAddr);
+
+        /// <summary>
+        /// Current location NAME (the Soul Link zone), resolved from the live map header.
+        /// Child map takes precedence over parent; sub-maps of one area share a name.
+        /// Returns null for unknown/transition map headers (so they don't create spurious zones).
+        /// </summary>
+        public string? ReadLocationName(IMemoryReader mem)
+        {
+            var child = U16(mem, ChildMapAddr);
+            if (BlackWhite2Maps.Names.TryGetValue(child, out var n)) return n;
+            var parent = U16(mem, MapIdAddr);
+            return BlackWhite2Maps.Names.TryGetValue(parent, out n) ? n : null;
+        }
 
         /// <summary>True while the game is in a battle (HP only settles at battle end in Gen 5).</summary>
         public bool IsInBattle(IMemoryReader mem) => U16(mem, InBattleAddr) == InBattleMagic;
